@@ -16,10 +16,14 @@ export const addCovidData = async (data) => {
     return await axios.get(`${API}/all`);
   };
 
+  export const getTotalCasesAndDeaths = async (state) => {
+    return await axios.get(`${API}/totals/${state}`);
+  };
+
 // Example basic functions
 // export const addCovidData = (data) => API.post('${API_BASE_URL}/add', data);
 // export const updateCovidData = (data) => API.post('/update', data);
-export const getTotalCasesAndDeaths = (state) => API.get(`/total?state=${state}`);
+// export const getTotalCasesAndDeaths = (state) => API.get(`/total?state=${state}`);
 export const deleteCovidData = (state) => API.post('/delete', { state });
 export const getFilteredData = (state, deaths) => API.get(`/filtered?state=${state}&deaths=${deaths}`);
 export const getHighCasesAndDeaths = (caseThreshold, deathThreshold) => API.get(`/highCasesAndDeaths?caseThreshold=${caseThreshold}&deathThreshold=${deathThreshold}`);

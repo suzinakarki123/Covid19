@@ -49,26 +49,22 @@ router.get('/all', async (req, res) => {
 
 // Get total cases & deaths for a state
 router.get('/totals/:state', async (req, res) => {
-  const stateParam = req.params.state;
   try {
-    const records = await CovidData.find({
-      state: { $regex: new RegExp(stateParam.trim(), 'i') }
-    });
+    const { state } = req.params;
 
-    if (records.length === 0) {
-      return res.status(404).json({ message: 'No records found' });
+    // Fetch the total cases and deaths for the given state
+    const result = await CovidData.aggregate([
+      { $match: { state: { $regex: new RegExp('^' + state + '$', 'i') } } },
+      { $group: { _id: "$state", totalCases: { $sum: "$cases" }, totalDeaths: { $sum: "$deaths" } } }
+    ]);
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: 'State not found or no data available.' });
     }
 
-    const totalCases = records.reduce((sum, record) => sum + record.cases, 0);
-    const totalDeaths = records.reduce((sum, record) => sum + record.deaths, 0);
-
-    res.status(200).json({
-      state: stateParam,
-      totalCases,
-      totalDeaths
-    });
+    res.json(result[0]); // Return the result object with total cases and deaths
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching totals', error: err.message });
+    res.status(500).json({ error: 'Failed to fetch total cases and deaths.' });
   }
 });
 

@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import AddDataForm from './components/AddDataForm';
 import UpdateDataForm from './components/UpdateDataForm';
 import AllDataDisplay from './components/AllDataDisplay';
+import DisplayTotals from './components/DisplayTotalCases';
 
 
 // function App() {
@@ -37,6 +38,7 @@ const App = () => {
           <Link to="/add">Add Data</Link>
           <Link to="/update">Update Data</Link>
           <Link to="/all">All Data</Link>
+          <Link to="/totals">Totals</Link>
           {/* More links for other components later */}
         </nav>
 
@@ -44,6 +46,7 @@ const App = () => {
           <Route path="/add" element={<AddDataForm />} />
           <Route path="/update" element={<UpdateDataForm />} />
           <Route path="/all" element={<AllDataDisplay />} />
+          <Route path="/totals" element={<DisplayTotals />} />
 
         </Routes>
       </div>

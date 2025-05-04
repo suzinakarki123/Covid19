@@ -3,46 +3,48 @@ const router = express.Router();
 const CovidData = require('../models/CovidData');
 
 // Add new COVID record
-router.post('/', async (req, res) => {
-  const { state, cases, deaths, date } = req.body;
+router.post('/add', async (req, res) => {
   try {
-    const newRecord = new CovidData({ state, cases, deaths, date });
-    await newRecord.save();
-    res.status(201).json({ message: 'New record added', data: newRecord });
-  } catch (err) {
-    res.status(500).json({ message: 'Error adding data', error: err.message });
+    const { state, cases, deaths, date } = req.body;
+
+    const newData = new CovidData({ state, cases, deaths, date });
+    await newData.save();
+
+    res.status(201).json({ message: 'Data added successfully!' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add data.' });
   }
 });
 
 // Update existing COVID record for a state
 router.post('/update', async (req, res) => {
-  const { state, cases, deaths, date } = req.body;
   try {
-    const updated = await CovidData.findOneAndUpdate(
+    const { state, cases, deaths, date } = req.body;
+
+    const result = await CovidData.findOneAndUpdate(
       { state },
       { cases, deaths, date },
       { new: true }
     );
-    if (!updated) {
-      return res.status(404).json({ message: 'State not found' });
+
+    if (!result) {
+      return res.status(404).json({ message: 'State not found.' });
     }
-    res.status(200).json({ message: 'Record updated', data: updated });
-  } catch (err) {
-    res.status(500).json({ message: 'Error updating data', error: err.message });
+
+    res.json({ message: 'Data updated successfully!', updatedData: result });
+  } catch (error) {
+    res.status(500).json({ error: 'Update failed.' });
   }
 });
 
 router.get('/all', async (req, res) => {
-    try {
-      const covidData = await CovidData.find(); // Fetch all records
-      if (covidData.length === 0) {
-        return res.status(404).json({ message: "No records found." });
-      }
-      res.status(200).json({ data: covidData });
-    } catch (err) {
-      res.status(500).json({ message: 'Error fetching data', error: err.message });
-    }
-  });
+  try {
+    const data = await CovidData.find();
+    res.json(data);  // This should return an array
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch data.' });
+  }
+});
   
 
 // Get total cases & deaths for a state

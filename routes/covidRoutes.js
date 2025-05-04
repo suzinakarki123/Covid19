@@ -69,18 +69,21 @@ router.get('/totals/:state', async (req, res) => {
 });
 
 // Delete a record by state
-router.post('/delete', async (req, res) => {
-  const { state } = req.body;
+router.delete('/delete/:state', async (req, res) => {
   try {
-    const deleted = await CovidData.findOneAndDelete({ state });
-    if (!deleted) {
-      return res.status(404).json({ message: 'No record found for this state' });
+    const { state } = req.params;
+    const result = await CovidData.deleteMany({ state });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: 'No records found for the given state.' });
     }
-    res.status(200).json({ message: 'Record deleted', data: deleted });
+
+    res.json({ message: `${result.deletedCount} record(s) deleted successfully.` });
   } catch (err) {
-    res.status(500).json({ message: 'Error deleting record', error: err.message });
+    res.status(500).json({ error: 'Failed to delete records.' });
   }
 });
+
 
 // Retrieve records where deaths exceed a user-specified value for a given state
 router.get('/filter', async (req, res) => {

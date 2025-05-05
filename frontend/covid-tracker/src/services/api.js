@@ -3,25 +3,31 @@ import axios from 'axios';
 // const API = axios.create({
 //   baseURL: 'http://localhost:3000/api/covid',
 // });
-const API = 'http://localhost:3000/api/covid'
+// const API = 'http://localhost:3000/api/covid'
 
-export const addCovidData = async (data) => {
-    return await axios.post(`${API}/add`, data);
-  };
-  export const updateCovidData = async (data) => {
-    return await axios.post(`${API}/update`, data);
-  };
+// export const addCovidData = async (data) => {
+//     return await axios.post(`${API}/add`, data);
+//   };
+//   export const updateCovidData = async (data) => {
+//     return await axios.post(`${API}/update`, data);
+//   };
 
-  export const getAllCovidData = async () => {
-    return await axios.get(`${API}/all`);
-  };
+//   export const getAllCovidData = async () => {
+//     return await axios.get(`${API}/all`);
+//   };
 
-  export const getTotalCasesAndDeaths = async (state) => {
-    return await axios.get(`${API}/totals/${state}`);
-  };
-  export const deleteCovidData = async (state) => {
-    return await axios.delete(`${API}/delete/${state}`);
-  };
+//   export const getTotalCasesAndDeaths = async (state) => {
+//     return await axios.get(`${API}/totals/${state}`);
+//   };
+//   export const deleteCovidData = async (state) => {
+//     return await axios.delete(`${API}/delete/${state}`);
+//   };
+
+const API = 'http://localhost:3000/api/covid';
+
+export const addCovidData = (data) => axios.post(`${API}/add`, data);
+export const getAllData = () => axios.get(`${API}/all`);
+export const deleteCovidData = (id) => axios.post(`${API}/delete`, { id });
 
 // Example basic functions
 // export const addCovidData = (data) => API.post('${API_BASE_URL}/add', data);

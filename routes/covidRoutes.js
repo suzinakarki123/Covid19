@@ -39,10 +39,24 @@ router.post('/update', async (req, res) => {
 
 router.get('/all', async (req, res) => {
   try {
-    const data = await CovidData.find();
-    res.json(data);  // This should return an array
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    const query = search
+      ? { state: { $regex: new RegExp(search, 'i') } }  // case-insensitive search
+      : {};
+
+    const total = await CovidData.countDocuments(query);
+    const data = await CovidData.find(query).skip((page - 1) * limit).limit(limit);
+
+    res.json({
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      data,
+    });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch data.' });
+    res.status(500).json({ error: 'Server error' });
   }
 });
   

@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 // import { getAllData, deleteCovidData } from '../services/api';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const ViewDetails = () => {
   const [covidData, setCovidData] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
 
   const fetchData = async (currentPage = 1, searchValue = '') => {
     try {
@@ -34,6 +36,18 @@ const ViewDetails = () => {
     setPage(1); // Reset to first page on new search
   };
 
+  const handleDelete = async (state) => {
+    try {
+      const confirm = window.confirm(`Are you sure you want to delete the data for "${state}"?`);
+      if (!confirm) return;
+
+      await axios.post('http://localhost:3000/api/covid/delete', { state });
+      fetchData(page, search);
+    } catch (err) {
+      console.error('Failed to delete data:', err);
+      alert('Error deleting data. Please try again.');
+    }
+  };
   return (
     <div className="table-container">
       <h2>COVID-19 Data</h2>
@@ -71,8 +85,8 @@ const ViewDetails = () => {
               <td>{item.deaths}</td>
               <td>{item.date?.substring(0, 10)}</td>
               <td>
-                <button>Edit</button>
-                <button>Delete</button>
+              <button onClick={() => navigate(`/update/${item.state}`)}>Edit</button>
+              <button onClick={() => handleDelete(item.state)}>Delete</button>
               </td>
             </tr>
           ))}

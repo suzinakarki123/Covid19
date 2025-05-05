@@ -16,9 +16,9 @@ import axios from 'axios';
 //     return await axios.get(`${API}/all`);
 //   };
 
-//   export const getTotalCasesAndDeaths = async (state) => {
-//     return await axios.get(`${API}/totals/${state}`);
-//   };
+  export const getTotalCasesAndDeaths = async (state) => {
+    return await axios.get(`${API}/totals/${state}`);
+  };
 //   export const deleteCovidData = async (state) => {
 //     return await axios.delete(`${API}/delete/${state}`);
 //   };

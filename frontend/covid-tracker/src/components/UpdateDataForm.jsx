@@ -1,52 +1,63 @@
-import React, { useState } from 'react';
-import { updateCovidData } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const UpdateDataForm = () => {
+  const { state } = useParams();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    state: '',
     cases: '',
     deaths: '',
     date: ''
   });
 
-  const [message, setMessage] = useState('');
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3000/api/covid/total/${state}`);
+        if (res.data) {
+          setFormData({
+            cases: res.data.cases,
+            deaths: res.data.deaths,
+            date: res.data.date?.substring(0, 10) || ''
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching data', err);
+      }
+    };
+    fetchData();
+  }, [state]);
 
   const handleChange = (e) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
+    setFormData({...formData, [e.target.name]: e.target.value});
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      await updateCovidData({
-        state: formData.state,
-        cases: parseInt(formData.cases),
-        deaths: parseInt(formData.deaths),
-        date: formData.date
+      await axios.post(`http://localhost:3000/api/covid/update`, {
+        state,
+        ...formData
       });
-      setMessage('Data updated successfully!');
-      setFormData({ state: '', cases: '', deaths: '', date: '' });
+      alert('Data updated successfully');
+      navigate('/view'); // or wherever your data table route is
     } catch (err) {
-      setMessage('Failed to update data.');
+      alert('Update failed');
       console.error(err);
     }
   };
 
   return (
-    <div>
-      <h2>Update COVID-19 Data</h2>
+    <div className="form-container">
+      <h2>Update COVID Data for {state}</h2>
       <form onSubmit={handleSubmit}>
-        <input type="text" name="state" value={formData.state} placeholder="State (to update)" onChange={handleChange} required /><br />
-        <input type="number" name="cases" value={formData.cases} placeholder="New Cases" onChange={handleChange} required /><br />
-        <input type="number" name="deaths" value={formData.deaths} placeholder="New Deaths" onChange={handleChange} required /><br />
-        <input type="date" name="date" value={formData.date} onChange={handleChange} required /><br />
+        <input type="number" name="cases" value={formData.cases} onChange={handleChange} placeholder="Cases" required />
+        <input type="number" name="deaths" value={formData.deaths} onChange={handleChange} placeholder="Deaths" required />
+        <input type="date" name="date" value={formData.date} onChange={handleChange} required />
         <button type="submit">Update Data</button>
       </form>
-      {message && <p>{message}</p>}
     </div>
   );
 };

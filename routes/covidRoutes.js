@@ -21,19 +21,37 @@ router.post('/update', async (req, res) => {
   try {
     const { state, cases, deaths, date } = req.body;
 
-    const result = await CovidData.findOneAndUpdate(
-      { state },
-      { cases, deaths, date },
+    const updated = await CovidData.findOneAndUpdate(
+      { state: state }, // match by state
+      {
+        $set: {
+          cases: cases,
+          deaths: deaths,
+          date: date
+        }
+      },
       { new: true }
     );
 
-    if (!result) {
-      return res.status(404).json({ message: 'State not found.' });
+    if (!updated) {
+      return res.status(404).json({ message: 'State not found' });
     }
 
-    res.json({ message: 'Data updated successfully!', updatedData: result });
+    res.status(200).json({ message: 'Data updated successfully', data: updated });
   } catch (error) {
-    res.status(500).json({ error: 'Update failed.' });
+    console.error('Error updating data:', error);
+    res.status(500).json({ message: 'Server error during update' });
+  }
+});
+
+router.get('/states', async (req, res) => {
+  try {
+    // Fetch unique states from your database
+    const states = await CovidData.distinct('state'); // 'state' is the field containing state names
+    res.json(states);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error' });
   }
 });
 
@@ -41,14 +59,10 @@ router.get('/all', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const search = req.query.search || '';
+    const skip = (page - 1) * limit;
 
-    const query = search
-      ? { state: { $regex: new RegExp(search, 'i') } }  // case-insensitive search
-      : {};
-
-    const total = await CovidData.countDocuments(query);
-    const data = await CovidData.find(query).skip((page - 1) * limit).limit(limit);
+    const total = await CovidData.countDocuments();
+    const data = await CovidData.find().skip(skip).limit(limit);
 
     res.json({
       totalPages: Math.ceil(total / limit),

@@ -7,6 +7,7 @@ const Navbar = () => {
   const [states, setStates] = useState([]);  // Store list of states
   const [state, setState] = useState('');  // Selected state
   const [totalCases, setTotalCases] = useState(0);  // Store total cases for selected state
+  const [totalDeaths, setTotalDeaths] = useState(0);
 
   // Fetch list of states from the backend
   useEffect(() => {
@@ -30,7 +31,8 @@ const Navbar = () => {
     if (selectedState) {
         try {
           const response = await axios.get(`http://localhost:3000/api/covid/totals/${selectedState}`);
-          setTotalCases(response.data.totalCases);  // If you want to also show deaths, you can add it here
+          setTotalCases(response.data.totalCases);
+          setTotalDeaths(response.data.totalDeaths);
         } catch (error) {
           console.error('Error fetching total cases:', error);
           setTotalCases(0);
@@ -44,7 +46,7 @@ const Navbar = () => {
       <div>
         <Link to="/" className="nav-link">Add Data</Link>
         <Link to="/view" className="nav-link">View Details</Link>
-        {/* <Link to="/totals" className="nav-link">Total Details</Link> */}
+        <Link to="/highrisk" className="nav-link">High Risk States</Link>
       </div>
 
       {/* Dropdown to select state */}
@@ -62,6 +64,7 @@ const Navbar = () => {
         
         {/* Display total cases for selected state */}
         <span>Total Cases: {totalCases}</span>
+        <span>Total Deaths: {totalDeaths}</span>
       </div>
     </nav>
   );

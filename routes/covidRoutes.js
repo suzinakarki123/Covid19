@@ -57,22 +57,26 @@ router.get('/states', async (req, res) => {
 
 router.get('/all', async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    const { page = 1, limit = 10, search = '' } = req.query;
 
-    const total = await CovidData.countDocuments();
-    const data = await CovidData.find().skip(skip).limit(limit);
+    // Case-insensitive search by state
+    const query = search ? { state: { $regex: search, $options: 'i' } } : {};
+
+    const totalCount = await CovidData.countDocuments(query);
+    const data = await CovidData.find(query)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
 
     res.json({
-      totalPages: Math.ceil(total / limit),
-      currentPage: page,
       data,
+      totalPages: Math.ceil(totalCount / limit),
+      currentPage: Number(page),
     });
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Failed to fetch data' });
   }
 });
+
   
 
 // Get total cases & deaths for a state
@@ -142,46 +146,31 @@ router.get('/filter', async (req, res) => {
   });
 
   // Retrieve all states where cases and deaths exceed a user-specified threshold
-router.get('/highCasesAndDeaths', async (req, res) => {
-    const { caseThreshold, deathThreshold } = req.query;
-  
-    // Ensure both thresholds are provided
-    if (!caseThreshold || !deathThreshold) {
-      return res.status(400).json({ message: 'caseThreshold and deathThreshold are required' });
-    }
-  
-    try {
-      // Convert the thresholds to numbers (they come as strings in the query)
-      const caseLimit = Number(caseThreshold);
-      const deathLimit = Number(deathThreshold);
-  
-      // Find states where both cases and deaths exceed the specified thresholds
-      const highStates = await CovidData.aggregate([
-        {
-          $group: {
-            _id: "$state",  // Group by state
-            totalCases: { $sum: "$cases" },  // Sum the cases for each state
-            totalDeaths: { $sum: "$deaths" },  // Sum the deaths for each state
-          }
-        },
-        {
-          $match: {
-            totalCases: { $gt: caseLimit },  // Only include states with totalCases > caseThreshold
-            totalDeaths: { $gt: deathLimit }  // Only include states with totalDeaths > deathThreshold
-          }
-        }
-      ]);
-  
-      if (highStates.length === 0) {
-        return res.status(404).json({ message: 'No states found matching the criteria' });
-      }
-  
-      // Send the result with states and their corresponding cases and deaths
-      res.status(200).json({ data: highStates });
-    } catch (err) {
-      res.status(500).json({ message: 'Error retrieving high cases and deaths data', error: err.message });
-    }
-  });
+// GET /api/covid/high-risk?cases=1000&deaths=100
+router.get('/high-risk', async (req, res) => {
+  try {
+    const { cases, deaths, page = 1, limit = 10 } = req.query;
+
+    const query = {
+      cases: { $gt: Number(cases) || 0 },
+      deaths: { $gt: Number(deaths) || 0 }
+    };
+
+    const total = await CovidData.countDocuments(query);
+    const results = await CovidData.find(query)
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    res.json({
+      data: results,
+      totalPages: Math.ceil(total / limit),
+      currentPage: Number(page),
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch high risk states.' });
+  }
+});
+
   
   
 // Exported for use in server.js

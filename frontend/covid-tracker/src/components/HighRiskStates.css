@@ -1,0 +1,49 @@
+.high-risk-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+    text-align: center;
+  }
+  
+  .threshold-form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .threshold-form input {
+    padding: 8px;
+    width: 150px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .threshold-form button {
+    padding: 8px 16px;
+    background-color: #3f51b5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .threshold-form button:hover {
+    background-color: #303f9f;
+  }
+  
+  .risk-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .risk-table th, .risk-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .risk-table th {
+    background-color: #f4f4f4;
+  }
+  

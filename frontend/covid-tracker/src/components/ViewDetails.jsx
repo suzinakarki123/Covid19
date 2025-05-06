@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-// import { getAllData, deleteCovidData } from '../services/api';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,12 +11,12 @@ const ViewDetails = () => {
 
   const fetchData = async (currentPage = 1, searchValue = '') => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/covid/all`, {
+      const res = await axios.get('http://localhost:3000/api/covid/all', {
         params: {
           page: currentPage,
           limit: 10,
-          search: searchValue
-        }
+          search: searchValue,
+        },
       });
       setCovidData(res.data.data);
       setTotalPages(res.data.totalPages);
@@ -33,21 +32,18 @@ const ViewDetails = () => {
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
-    setPage(1); // Reset to first page on new search
+    setPage(1); // Reset to first page on search change
   };
 
-  const handleDelete = async (state) => {
+  const handleDelete = async (stateName) => {
     try {
-      const confirm = window.confirm(`Are you sure you want to delete the data for "${state}"?`);
-      if (!confirm) return;
-
-      await axios.post('http://localhost:3000/api/covid/delete', { state });
-      fetchData(page, search);
-    } catch (err) {
-      console.error('Failed to delete data:', err);
-      alert('Error deleting data. Please try again.');
+      await axios.delete(`http://localhost:3000/api/covid/${stateName}`);
+      fetchData(page, search); // Refresh list
+    } catch (error) {
+      console.error('Failed to delete', error);
     }
   };
+
   return (
     <div className="table-container">
       <h2>COVID-19 Data</h2>
@@ -85,8 +81,8 @@ const ViewDetails = () => {
               <td>{item.deaths}</td>
               <td>{item.date?.substring(0, 10)}</td>
               <td>
-              <button onClick={() => navigate(`/update/${item.state}`)}>Edit</button>
-              <button onClick={() => handleDelete(item.state)}>Delete</button>
+                <button onClick={() => navigate(`/update/${item.state}`)}>Edit</button>
+                <button onClick={() => handleDelete(item.state)}>Delete</button>
               </td>
             </tr>
           ))}
@@ -94,13 +90,9 @@ const ViewDetails = () => {
       </table>
 
       <div className="pagination">
-        <button onClick={() => setPage(page - 1)} disabled={page === 1}>
-          Prev
-        </button>
+        <button onClick={() => setPage(page - 1)} disabled={page === 1}>Prev</button>
         <span> Page {page} of {totalPages} </span>
-        <button onClick={() => setPage(page + 1)} disabled={page === totalPages}>
-          Next
-        </button>
+        <button onClick={() => setPage(page + 1)} disabled={page === totalPages}>Next</button>
       </div>
     </div>
   );

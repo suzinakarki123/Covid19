@@ -35,12 +35,19 @@ const ViewDetails = () => {
     setPage(1); // Reset to first page on search change
   };
 
-  const handleDelete = async (stateName) => {
-    try {
-      await axios.delete(`http://localhost:3000/api/covid/${stateName}`);
-      fetchData(page, search); // Refresh list
-    } catch (error) {
-      console.error('Failed to delete', error);
+  const handleDelete = async (state) => {
+    const confirmed = window.confirm(`Are you sure you want to delete the data for ${state}?`);
+    if (confirmed) {
+      try {
+        // Delete request to the backend
+        await axios.delete(`http://localhost:3000/api/covid/delete/${state}`);
+        alert('Data deleted successfully!');
+        // Refresh the data after deletion
+        fetchData(page, search);
+      } catch (error) {
+        console.error('Error deleting data', error);
+        alert('Error deleting data.');
+      }
     }
   };
 

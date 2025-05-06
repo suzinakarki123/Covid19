@@ -104,49 +104,41 @@ router.get('/totals/:state', async (req, res) => {
 router.delete('/delete/:state', async (req, res) => {
   try {
     const { state } = req.params;
-    const result = await CovidData.deleteMany({ state });
+
+    // Delete the document for the given state
+    const result = await CovidData.deleteOne({ state: { $regex: new RegExp('^' + state + '$', 'i') } });
 
     if (result.deletedCount === 0) {
-      return res.status(404).json({ message: 'No records found for the given state.' });
+      return res.status(404).json({ message: 'State not found or no data available.' });
     }
 
-    res.json({ message: `${result.deletedCount} record(s) deleted successfully.` });
+    res.status(200).json({ message: `State ${state} deleted successfully.` });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete records.' });
+    res.status(500).json({ error: 'Failed to delete data.' });
   }
 });
 
 
 // Retrieve records where deaths exceed a user-specified value for a given state
-router.get('/filter', async (req, res) => {
-    const { state, deathThreshold } = req.query;
-  
-    if (!state || !deathThreshold) {
-      return res.status(400).json({ message: 'State and deathThreshold are required' });
-    }
-  
-    try {
-      // Convert the deathThreshold to a number (it's passed as a string in the query)
-      const threshold = Number(deathThreshold);
-  
-      // Find all records for the given state where deaths exceed the threshold
-      const filteredRecords = await CovidData.find({
-        state: { $regex: new RegExp(state.trim(), 'i') },  // case-insensitive match
-        deaths: { $gt: threshold }  // deaths greater than the threshold
-      });
-  
-      if (filteredRecords.length === 0) {
-        return res.status(404).json({ message: 'No records found matching the criteria' });
-      }
-  
-      res.status(200).json({ data: filteredRecords });
-    } catch (err) {
-      res.status(500).json({ message: 'Error retrieving filtered data', error: err.message });
-    }
-  });
+router.get('/filter-deaths', async (req, res) => {
+  try {
+    const { deaths } = req.query;
 
-  // Retrieve all states where cases and deaths exceed a user-specified threshold
-// GET /api/covid/high-risk?cases=1000&deaths=100
+    // Fetch the records where deaths exceed the given value
+    const results = await CovidData.find({ deaths: { $gt: Number(deaths) } })
+      .limit(20);  // Limit to first 20 records
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'No records found with deaths exceeding this value.' });
+    }
+
+    res.json(results);  // Return the filtered data
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch filtered data based on deaths.' });
+  }
+});
+
+
 router.get('/high-risk', async (req, res) => {
   try {
     const { cases, deaths, page = 1, limit = 10 } = req.query;

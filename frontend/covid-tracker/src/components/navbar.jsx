@@ -47,6 +47,7 @@ const Navbar = () => {
         <Link to="/" className="nav-link">Add Data</Link>
         <Link to="/view" className="nav-link">View Details</Link>
         <Link to="/highrisk" className="nav-link">High Risk States</Link>
+        <Link to="/filteredData" className="nav-link">Filtered Data</Link>
       </div>
 
       {/* Dropdown to select state */}

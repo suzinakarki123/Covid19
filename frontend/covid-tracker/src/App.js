@@ -6,6 +6,7 @@ import ViewDetails from './components/ViewDetails';
 import UpdateForm from './components/UpdateDataForm';
 import TotalsCases from './components/DisplayTotalCases';
 import HighRiskStates from './components/HighRiskStates';
+import FilteredDataDisplay from './components/FilteredDataDisplay';
 import './App.css';
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
           <Route path="/update/:state" element={<UpdateForm />} />
           <Route path="/totals/:state" element={<TotalsCases />} />
           <Route path="/highrisk" element={<HighRiskStates />} />
+          <Route path="/filteredData" element={<FilteredDataDisplay />} />
           
 
         </Routes>
